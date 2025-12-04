@@ -1,5 +1,12 @@
+local ASTRO_KIT_VERSION = 1
+
+if AstroKit ~= nil and AstroKit.Version >= ASTRO_KIT_VERSION then
+    return
+end
+
 ---@class AstroKit
-local AstroKit = {}
+AstroKit = {}
+AstroKit.Version = ASTRO_KIT_VERSION
 
 -- AstroKit.TearModifier = require "astro.utils.tear-modifier"
 -- AstroKit.SpringAnimation = require "astro.utils.spring-animation"
@@ -556,3 +563,20 @@ end
 
 --     return -108000
 -- end
+
+function AstroKit:GetCurrentModPath()
+	if debug then
+		return string.sub(debug.getinfo(AstroKit.GetCurrentModPath).source, 2) .. "/../"
+	end
+	--use some very hacky trickery to get the path to this mod
+	local _, err = pcall(require, "")
+	local _, basePathStart = string.find(err, "no file '", 1)
+	local _, modPathStart = string.find(err, "no file '", basePathStart)
+	local modPathEnd, _ = string.find(err, ".lua'", modPathStart)
+	local modPath = string.sub(err, modPathStart + 1, modPathEnd - 1)
+	modPath = string.gsub(modPath, "\\", "/")
+	modPath = string.gsub(modPath, "//", "/")
+	modPath = string.gsub(modPath, ":/", ":\\")
+
+	return modPath
+end
