@@ -8,6 +8,8 @@ end
 AstroKit = {}
 AstroKit.Version = ASTRO_KIT_VERSION
 
+local mod = RegisterMod("AstroKit", 1)
+
 -- AstroKit.TearModifier = require "astro.utils.tear-modifier"
 -- AstroKit.SpringAnimation = require "astro.utils.spring-animation"
 
@@ -472,26 +474,26 @@ local function RunUpdates(tab) --This is from Fiend Folio
     end
 end
 
--- AstroKit.DelayedFuncs = {}
+AstroKit.DelayedFuncs = {}
 
--- ---Scheduled update from Fiend Folio
--- ---@param foo function
--- ---@param delay integer
--- ---@param callback ModCallbacks?
--- function AstroKit:ScheduleForUpdate(foo, delay, callback)
---     callback = callback or ModCallbacks.MC_POST_UPDATE
---     if not AstroKit.DelayedFuncs[callback] then
---         AstroKit.DelayedFuncs[callback] = {}
---         AstroKit:AddCallback(
---             callback,
---             function()
---                 RunUpdates(AstroKit.DelayedFuncs[callback])
---             end
---         )
---     end
+---Scheduled update from Fiend Folio
+---@param foo function
+---@param delay integer
+---@param callback ModCallbacks?
+function AstroKit:ScheduleForUpdate(foo, delay, callback)
+    callback = callback or ModCallbacks.MC_POST_UPDATE
+    if not AstroKit.DelayedFuncs[callback] then
+        AstroKit.DelayedFuncs[callback] = {}
+        mod:AddCallback(
+            callback,
+            function()
+                RunUpdates(AstroKit.DelayedFuncs[callback])
+            end
+        )
+    end
 
---     table.insert(AstroKit.DelayedFuncs[callback], {Func = foo, Delay = delay})
--- end
+    table.insert(AstroKit.DelayedFuncs[callback], {Func = foo, Delay = delay})
+end
 
 ---@param worldPosition Vector
 ---@return Vector
@@ -563,20 +565,3 @@ end
 
 --     return -108000
 -- end
-
-function AstroKit:GetCurrentModPath()
-	if debug then
-		return string.sub(debug.getinfo(AstroKit.GetCurrentModPath).source, 2) .. "/../"
-	end
-	--use some very hacky trickery to get the path to this mod
-	local _, err = pcall(require, "")
-	local _, basePathStart = string.find(err, "no file '", 1)
-	local _, modPathStart = string.find(err, "no file '", basePathStart)
-	local modPathEnd, _ = string.find(err, ".lua'", modPathStart)
-	local modPath = string.sub(err, modPathStart + 1, modPathEnd - 1)
-	modPath = string.gsub(modPath, "\\", "/")
-	modPath = string.gsub(modPath, "//", "/")
-	modPath = string.gsub(modPath, ":/", ":\\")
-
-	return modPath
-end
